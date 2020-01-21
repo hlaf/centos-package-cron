@@ -1,7 +1,7 @@
 # coding: utf8
 
 from errata_item import *
-import urllib2
+import requests
 import contextlib
 from os.path import exists
 from ConfigParser import RawConfigParser
@@ -103,8 +103,8 @@ class ErrataParser:
 class ErrataFetcher:
 
     def get_errata(self):
-        with contextlib.closing(get_opener().open(ERRATA_URL)) as response:
-            xml = response.read()
+        with contextlib.closing(requests.get(ERRATA_URL)) as response:
+            xml = response.text
         parser = ErrataParser()
         return parser.parse(xml)
 
