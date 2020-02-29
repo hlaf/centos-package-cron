@@ -17,7 +17,7 @@ class PackageChecker:
         return compareEVR( ('', advisory_package['version'], advisory_package['release']), ('', installed_package.version, installed_package.release))
 
     def match_advisory_against_installed(self,advisory_package,current_installed):
-        installed_versions = filter(lambda inst: advisory_package['name'] == inst.name, current_installed)
+        installed_versions = filter(lambda inst: advisory_package['name'] == inst.name and advisory_package['arch'] == inst.arch, current_installed)
         if not self._advisoryPackageMeantForCurrentOs(advisory_package):
             return []
         # Deal with cases where both old and new kernel packages are installed
