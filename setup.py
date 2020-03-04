@@ -23,7 +23,7 @@ class PyTest(TestCommand):
         errno = pytest.main(self.pytest_args)
         sys.exit(errno)
 
-version = '1.0.11'
+version = '1.0.12'
 setuptools.setup(name='centos_package_cron',
       version=version,
       description='CentOS Package Update Utilities',
