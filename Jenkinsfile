@@ -2,7 +2,7 @@
 
 @Library('emt-pipeline-lib@master') _
 
-repo_creds   = 'emt-jenkins-git-ssh'
+repo_creds   = 'emt-jenkins-github-ssh'
 version_file = 'setup.py'
 version_key  = 'version'
 
