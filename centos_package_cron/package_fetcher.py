@@ -58,7 +58,9 @@ class PackageFetcher:
         return result
 
     def get_package_updates(self):
+        sys.stdout = open(os.devnull, "w")
         raw_updates = self.yb.update()
+        sys.stdout = sys.__stdout__
         result = map(lambda x: Package(x.name,x.version,x.release, x.arch, x.repoid), raw_updates)
         return result
         

@@ -95,7 +95,41 @@ stuff
 
 """
         assert self.old_general_alerts_removed == [package]
-        
+
+    def test_get_report_content_minimal(self):
+        # arrange
+        producer = self.get_producer()
+        package = Package('libgcrypt', '1.5.3', '4.el7', 'x86_64', 'updates')
+        self.general_updates = [package]
+        self.changelogs = {('libgcrypt', '1.5.3', '4.el7'): 'stuff'}
+
+        # act
+        result = producer.get_report_content_minimal()
+
+        # assert
+        assert result == "libgcrypt-1.5.3-4.el7\n"
+        assert self.old_general_alerts_removed == [package]
+
+    def test_get_report_content_minimal_many_packages_depends_on_enabled(self):
+        # arrange
+        producer = self.get_producer(include_depends_on=True)
+        package1 = Package('libgcrypt', '1.5.3', '4.el7', 'x86_64', 'updates')
+        package2 = Package('foo', '1.5.3', '4.el7', 'x86_64', 'updates')
+        self.general_updates = [package1, package2]
+        self.changelogs = {('libgcrypt', '1.5.3', '4.el7'): 'stuff', ('foo', '1.5.3', '4.el7'): 'bah'}
+        self.depends_on['libgcrypt'] = [Package('openssl', '1.2', '4.el7', 'x86_64', ''), Package(
+            'gnutls', '1.3', '4.el7', 'x86_64', '')]
+        self.depends_on['foo'] = [Package('bah', '1.2', '4.el7', 'x86_64', '')]
+
+        # act
+        result = producer.get_report_content_minimal()
+
+        # assert
+        assert result == """foo-1.5.3-4.el7
+libgcrypt-1.5.3-4.el7
+"""
+        assert self.old_general_alerts_removed == [package1, package2]
+
     def test_get_report_content_general_but_no_security_advisories_depends_on_enabled(self):
         # arrange
         producer = self.get_producer(include_depends_on=True)
