@@ -1,7 +1,7 @@
 # Centos-Package-Cron
 
-[![Build Status](https://img.shields.io/travis/wied03/centos-package-cron/master.svg?style=flat)](https://travis-ci.org/wied03/centos-package-cron)
-[![Quality](https://api.codeclimate.com/v1/badges/ce1d686b27f9ba2f4f2a/maintainability)](https://codeclimate.com/github/wied03/centos-package-cron/maintainability)
+[![Build Status](https://img.shields.io/travis/wied03/centos-package-cron/master.svg?style=flat)](https://travis-ci.org/unitedtraders/centos-package-cron)
+[![Quality](https://api.codeclimate.com/v1/badges/ce1d686b27f9ba2f4f2a/maintainability)](https://codeclimate.com/github/unitedtraders/centos-package-cron/maintainability)
 
 Attempts to offer Apticron (Ubuntu) style package update emails and also bring security notifications to CentOS via Meier's script
 
@@ -9,8 +9,8 @@ Attempts to offer Apticron (Ubuntu) style package update emails and also bring s
 
 * Checks for updates using Yum's Python API and changelogs for those updates using Yum's changelog plugin
 * Checks security errata from CentOS mailing list via [Steve Meier's XML file](https://cefs.steve-meier.de/) and reports advisories related to packages installed on your machine
-* Emails (or dumps to STDOUT) the above information to an address of your choosing
-* By default, only reminds about a given security advisory / package update once to avoid annoying you.  You can change this using the --skipold false option (see -h)
+* Provides report to stdout in JSON or plain text forms
+* By default, only reminds about a given security advisory / package update once to avoid annoying you.  You can change this using the --forceold option (see -h)
 
 ## Why does this exist?
 
@@ -24,7 +24,13 @@ Some of these are good options but if you don't want Spacewalk and want more Apt
 
 ## Requirements
 
-Tested on CentOS 7, 6.6, and 6.7, but coded in a way that should work even CentOS 5. The dependencies as listed in the RPM spec might need to be tweaked to run properly on CentOS < 6.6. If you can help test with that, feel free to create a pull request.
+Tested on CentOS 7, Python 2.7.
+
+## Development in Docker
+
+* Build Docker image from `docker/centos7/run.Dockerfile`: `docker build -t centos-package-development -f docker/centos7/run.Dockerfile docker/centos7`
+* Launch image with code folder: `docker run --rm -v $(pwd):/app -w /app -u nonrootuser -ti centos-package-development`
+* Run tests: `python setup.py test`
 
 ## Installation
 
@@ -32,18 +38,10 @@ Tested on CentOS 7, 6.6, and 6.7, but coded in a way that should work even CentO
 
 From pypi:
 
-```shell
-# These packages are OS centric and not available on pypi
-sudo yum install mailx yum-plugin-changelog
-pip install centos_package_cron
-# For the SQLite DB that avoids reminding you of updates that were already sent (see above)
-mkdir /var/lib/centos-package-cron
-```
-
 From checked out copy:
 
 ```shell
-sudo yum install mailx yum-plugin-changelog
+sudo yum install yum-plugin-changelog
 ./setup.py install
 # For the SQLite DB that avoids reminding you of updates that were already sent (see above)
 mkdir /var/lib/centos-package-cron
@@ -51,22 +49,6 @@ mkdir /var/lib/centos-package-cron
 
 ### Using RPM
 
-You can download the source (or binary) RPM from the [releases page](https://github.com/wied03/centos-package-cron/releases).
-
-**CentOS package submission pending**
-
-OR if you want to build the RPM yourself:
-
-If you use Docker, you can checkout this repository and build an RPM this way:
-
-```shell
-# install ruby & Rake
-# use centos6 if that applies
-CENTOS=centos7 rake build
-# source and binary RPMs will be deposited in built_rpms directory
-```
-
-If you'd rather not use Docker or Ruby/Rake, then do something like this:
 ```shell
 sudo yum install rpm-build yum-utils
 # copy centos-package-cron.spec.in to centos-package-cron.spec and put the proper version numbers in those placeholders
@@ -79,14 +61,24 @@ sudo yum install centos-package-cron-1.0.6-0.1.el7.centos.x86_64.rpm
 ## Usage
 
 ```shell
-centos-package-cron --email_to sysadmin@stuff.com --email_from dev@somebox.com
-# See centos-package-cron -h for options
+# See centos-package-cron -h for all options
+
+# show all security updates
+centos-package-cron -fo
+
+# install all security updates except postgresql and docker
+centos-package-cron -f minimal -fo | grep -v postgresql | grep -v docker | grep -v containerd | xargs sudo yum upgrade
 ```
 
-NOTE: You must have an MTA (e.g. postfix) configured listening on localhost if you use the email output option.
+## TODO
+
+* Add CentOS 8 compability and test suites
 
 ## License
+
 Copyright (c) 2016, BSW Technology Consulting LLC
+              2020, UnitedTraders
+
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
