@@ -18,7 +18,8 @@ class ReportProducer:
                  checker=None,
                  annoyance_fetcher=None,
                  db_session_fetch=None,
-                 include_depends_on=None):
+                 include_depends_on=None,
+                 advisories_only=False):
         self.executor = MockableExecute()
         self.pkg_fetcher = pkg_fetcher or PackageFetcher(ChangeLogParser(), self.executor, repos_to_exclude_list, repos_to_include_list)
         self.checker = checker or PackageChecker(ErrataFetcher(), self.pkg_fetcher, OsVersionFetcher())
@@ -27,6 +28,7 @@ class ReportProducer:
         self.annoyance_check = None
         self.skip_old_notices = skip_old_notices
         self.include_depends_on = include_depends_on
+        self.advisories_only = advisories_only
         
     def _get_sorted_relevant_advisories(self):
         security_advisories = filter(lambda adv:adv['advisory'].type == ErrataType.SecurityAdvisory,self.checker.findAdvisoriesOnInstalledPackages())
@@ -167,10 +169,11 @@ class ReportProducer:
             advisories = self._get_sorted_relevant_advisories()
             email_body = self._add_advisories_to_email(advisories, email_body)
             email_body = self._handle_section_boundary(email_body)
-            general_updates = self._get_general_updates()
-            email_body = self._add_general_updates_to_email(general_updates, email_body)
-            email_body = self._handle_section_boundary(email_body)
-            email_body = self._add_changelogs_to_email(general_updates, email_body)
+            if not self.advisories_only:
+                general_updates = self._get_general_updates()
+                email_body = self._add_general_updates_to_email(general_updates, email_body)
+                email_body = self._handle_section_boundary(email_body)
+                email_body = self._add_changelogs_to_email(general_updates, email_body)
 
         self.annoyance_check = None
         return email_body
@@ -180,7 +183,8 @@ class ReportProducer:
         with self.db_session_fetch as session:
             self.annoyance_check = self.annoyance_fetcher.fetch(session)
             output['advisories'] = self._get_advisories_as_json(self._get_sorted_relevant_advisories())
-            output['updates'] = self._add_general_updates_as_json(self._get_general_updates())
+            if not self.advisories_only:
+                output['updates'] = self._add_general_updates_as_json(self._get_general_updates())
 
         self.annoyance_check = None
 

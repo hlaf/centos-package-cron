@@ -28,7 +28,7 @@ def main():
         repos_to_include_list = args.enablerepo.split(',')
 
     skipold = not args.forceold
-    producer = ReportProducer(repos_to_exclude_list, repos_to_include_list, skipold, args.skip_sqlite_file_path, include_depends_on=args.include_depends_on)
+    producer = ReportProducer(repos_to_exclude_list, repos_to_include_list, skipold, args.skip_sqlite_file_path, include_depends_on=args.include_depends_on, advisories_only=args.advisories_only)
 
     report_content = producer.get_report_content_as_json() if args.json else producer.get_report_content()
 
@@ -90,6 +90,10 @@ def parse_args():
 
     parser.add_argument('-j','--json',
     help='Output the results in JSON format',
+    action="store_true")
+
+    parser.add_argument('-ao','--advisories_only',
+    help='Check only for security advisories',
     action="store_true")
 
     return parser.parse_args()
