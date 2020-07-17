@@ -12,7 +12,7 @@ import smtplib
 from email.mime.text import MIMEText
 import pkg_resources
 
-__VERSION__ = pkg_resources.require("centos_package_cron")[0].version
+__VERSION__ = pkg_resources.get_distribution("centos_package_cron").version
 
 def main():
     args = parse_args()
