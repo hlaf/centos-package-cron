@@ -9,7 +9,7 @@ domain_name  = getDnsDomainName()
 artifact_repo_url = "http://nexus.${domain_name}:8082/repository/emt-pypi-internal/"
 artifact_repo_creds = 'nexus-credentials'
 
-node('linux') {
+node('docker-slave') {
 
   stage('Checkout') {
 	checkout(scm)
