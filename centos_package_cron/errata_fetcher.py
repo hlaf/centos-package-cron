@@ -63,7 +63,8 @@ class ErrataParser:
             'Important': ErrataSeverity.Important,
             'Moderate': ErrataSeverity.Moderate,
             'Low': ErrataSeverity.Low,
-            'Critical': ErrataSeverity.Critical
+            'Critical': ErrataSeverity.Critical,
+            'Na': None
         }
         try:
             return mapping[theSeverity]
